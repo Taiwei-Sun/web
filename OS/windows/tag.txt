@@ -1,0 +1,52 @@
+
+slmgr -REARM
+
+Press “Windows + R” you will see Run dialog. Or Go to Start, click Run.
+
+Type “Regedit”. Click Ok. You will see Registry editor window.
+
+Click on Arrow mark which is left to “HKEY_LOCAL_MACHINE”.
+
+Click on arrow mark which is left to “SOFTWARE”.
+
+Click on arrow mark which is left to “Microsoft”.
+
+Click on arrow mark which is left to “Windows NT”.
+
+Click on arrow mark which is left to “CurrentVersion”.
+
+Now click on the word “SoftwareProtectionPlatform” not on arrow mark.
+
+Right click on “SkipRearm” in the right window.
+
+Click on “Modify”. Change “Value Data” to “1”.
+
+Restart PC.
+
+
+sc start MyService
+
+
+
+
+
+
+
+
+桌面上做用檔案總管開啟FTP的捷徑，這樣只要在桌面上點兩下就幫你開啟FTP
+
+A：做捷徑的方法如下：在桌面上按右鍵--新增--捷徑  把這段貼上去
+%SystemRoot%\explorer.exe ftp://ftp-server/
+按下一步，隨便輸入好記名稱後確定 (ftp路徑請以實際路徑輸入）
+
+來源: http://blog.yam.com/tznog9/article/20317579
+
+
+windows 權限設定
+takeown /f lostfile 
+icacls
+
+
+route add 10.0.0.0 mask 255.0.0.0 10.7.5.254
+
+netsh interface ipv4 set address name="區域連線" static 10.7.5.219 255.255.255.0 10.7.5.254

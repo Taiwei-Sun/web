@@ -1,0 +1,76 @@
+
+networksetup -listallnetworkservices
+networksetup -setv6off 'AX88179 USB 3.0 to Gigabit Ethernet'
+sudo networksetup -setdhcp 'AX88179 USB 3.0 to Gigabit Ethernet'
+sudo networksetup -setmanual 'AX88179 USB 3.0 to Gigabit Ethernet' 10.7.5.227 255.255.255.0 192.168.2.1
+
+find ~/.Trash/ -atime +7 -delete
+
+AppleScript
+tell app "Finder"
+empty the trash
+beep
+end tell
+
+
+
+使用有線網路者：    networksetup -setv6off Ethernet
+使用無線網路者：    networksetup -setv6off Wi-Fi
+意思是先關閉 ipv6 的設定。
+port name: sudo networksetup -listnetworkserviceorder
+
+
+pmset -g batt
+ioreg -l -w0 |grep MaxCapacity|sed 's/| |//g'
+echo `/bin/date '+%Y%m%d%H%M%S'``/usr/sbin/ioreg -l -w0 |grep -E 'MaxCapacity|CycleCount|CurrentCapacity’|grep -v DesignC|sed 's/| |//g'` >> ~/Desktop/power.txt
+
+
+
+
+
+sundaiweide-MacBook:~ magotai$ echo `date``ioreg -l -w 0|grep MaxCapacity|sed 's/| |//g'`
+2016年10月 4日 周二 09時14分02秒 CST  "MaxCapacity" = 5381
+sundaiweide-MacBook:~ magotai$ echo ${date}${ioreg -l -w 0|grep MaxCapacity|sed 's/| |//g'}
+-bash: ${date}${ioreg -l -w 0|grep MaxCapacity|sed 's/| |//g'}: bad substitution
+sundaiweide-MacBook:~ magotai$ echo (date)(ioreg -l -w 0|grep MaxCapacity|sed 's/| |//g')
+-bash: syntax error near unexpected token `date'
+
+
+
+
+
+To run a command on start up on OS X, you need to use launchd.
+If you don't want to use Lingon, you need to create a launchd Property List. This is an XML file, so you can do it with your favourite text editor or alternatively you can use the Property List Editor that's installed with the Mac OS X Dev Tools. Create the following:
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>some.meaningful.name</string> <!-- org.mongodb.mongodb perhaps? -->
+
+    <key>OnDemand</key>
+    <false/>
+
+    <key>UserName</key>
+    <string>anAppropriateUser</string>
+
+    <key>GroupName</key>
+    <string>anAppropriateGroup</string>
+
+    <key>ProgramArguments</key>
+    <array>
+            <string>/Applications/MongoDB/bin/mongod</string>
+            <string>--dbpath</string>
+            <string>/usr/local/mongo/data</string>
+            <string>--fork</string>
+            <string>--logpath</string>
+            <string>/usr/local/mongo/log</string>
+    </array>
+</dict>
+</plist>
+Save this in /Library/LaunchAgents/some.meaningful.name.plist (you will need an administrator account and/or sudo), then open a terminal and do:
+sudo launchctl load /Library/LaunchAgents/some.meaningful.name.plist
+This will cause launchd to load the item which will cause it to start MongoDB on boot. As a bonus, launchd will monitor it and, if it exits for any reason, it will be re-started. To get rid of the item simply replace load in the above command with unload.
+
+
+md5 big_huge_file.iso

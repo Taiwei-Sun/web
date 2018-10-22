@@ -1,0 +1,34 @@
+@charset "utf-8";
+* {margin:0px; padding:0px;}
+body
+{
+	background-color: #c0c0c0;
+}
+#header
+{
+	background-color:#36C;
+	width: 100%;
+	
+}
+.selectBox
+{
+	background-color: #0a0aff;		
+}
+.emptyBox
+{
+	background-color: #000000;
+	z-index: 20;
+}
+.emptyBox img
+{
+	z-index: -1;
+}
+.normalBox
+{
+	background-color: #000000;
+	z-index: 50;
+}
+.pic
+{
+	
+}

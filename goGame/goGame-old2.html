@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript">
+function setVariable(n)
+{
+ var h=window.innerHeight;
+ var w=window.innerWidth;
+
+ document.boardNum=n
+
+ //document.ph=100/(n+2);//set piece height and width
+ //document.pw=100/(n+2);
+ document.ph=h/(n+2);//set piece height and width
+ document.pw=w/(n+2);
+
+ if(h>w)document.ph=document.ph*w/h;//select smaller
+ else document.pw=document.pw*h/w;
+}
+
+//alert("h="+h); 
+function around()
+{
+ var ph=document.ph;
+ var pw=document.pw;
+ var py=document.ph;
+ var px=document.pw;
+ var n=document.boardNum;
+
+ for(y=0;y<n;y++){
+  for(x=0;x<n;x++){
+   var pDiv=document.createElement("div");
+   var pp=document.createElement("img");
+ 
+   pDiv.style.position="absolute";
+
+
+   //set rotate and src
+   if(x>0&&x<n-1&&y>0&&y<n-1)//center
+   {
+    pp.src="go1.png";
+   }
+   else if((x>0&&x<n-1)||(y>0&&y<n-1))
+   {
+    if(y==0)pp.src="go2-1.png";
+    else if(x==0)pp.src="go2-2.png";
+    else if(x==n-1)pp.src="go2-3.png";
+    else pp.src="go2-4.png";
+   }
+   else//corner 
+   {
+    if(x==0&&y==0)pp.src="go3-1.png";
+    else if(y==0)pp.src="go3-2.png";
+    else if(x==0)pp.src="go3-3.png";
+    else pp.src="go3-4.png";
+   }
+
+
+   pp.style.height=ph+'px';
+   pp.style.width=pw+'px';
+   pDiv.style.height=ph+'px';
+   pDiv.style.width=pw+'px';
+
+   pDiv.style.top=py+'px';
+   pDiv.style.left=px+'px';
+
+   pDiv.appendChild(pp);
+   document.body.appendChild(pDiv);
+   px=px+pw;
+  }
+  px=pw;
+  py=py+ph;
+ }
+
+}
+
+function goStart()
+{
+ setVariable(19);
+ around(); 
+
+}
+
+</script>
+<link rel="stylesheet" type="text/css" href="00css/goGame.css">
+</head>
+<body onload="goStart()">
+</body>
+</html>

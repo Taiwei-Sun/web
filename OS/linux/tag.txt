@@ -1,0 +1,180 @@
+可以對介面產生UUID：uuidgen eth0
+查詢某個未安裝指令的軟體(red hat)：yum provides \*/bin/<command>
+查看網路介面上的封包：tcpdump -nni eth0 -vvv
+產生公鑰、私鑰：ssh-keygen -t rsa -b 4096
+
+用linux轉發封包
+查詢是否能轉發
+sysctl net.ipv4.ip_forward
+or
+cat /proc/sys/net/ipv4/ip_forward
+ 
+改成可轉發
+sysctl -w net.ipv4.ip_forward=1
+or
+echo 1 > /proc/sys/net/ipv4/ip_forward
+ 
+修改開機後可轉發
+在/etc/sysctl.conf裡，修改net.ipv4.ip_forward = 1
+
+sysctl -p /etc/sysctl.conf
+重啟服務/etc/init.d/procps.sh restart
+ 
+Shell Script
+
+
+[ 0 -eq 0 ] && ${echo 'yes'; echo 'yes2’;} || echo 'no'; #bad substitution
+
+[ 0 -eq 0 ] && `echo 'yes'; echo 'yes2';` || echo 'no'; #持續輸出yes2
+
+[ 0 -eq 0 ] && (echo 'yes'; echo 'yes2';) || echo 'no'; #輸出yes和yes2
+
+
+tmsh show sys connection
+srcIP=($(tmsh show sys connection |awk '$6!=""{print $1 " " $2 " " $5 " " $6}' | sed 's/%1:/ /g' |awk '{print $1 }'))
+
+
+myarr=($(ps -u kdride | awk '{ print $1 }'))
+
+# Now access elements of an array (change "1" to whatever you want)
+echo ${myarr[1]}
+
+# Or loop through every element in the array
+for i in "${myarr[@]}"
+do
+   :
+  echo $i
+done
+
+
+echo ${#src[@]}
+
+
+
+dd status=noxfer conv=notrunc if=myfirst.bin of=myfirst.flp
+mkisofs -o myfirst.iso -b myfirst.flp cdiso/
+
+
+
+ls |grep gz | xargs -p -n 1 gzip -d 
+
+
+dmesg 掛載和新資訊
+
+
+	•	getfacl：取得某個檔案/目錄的 ACL 設定項目．
+	•	setfacl：設定某個目錄/檔案的 ACL 規範。
+
+
+
+ tcpdump -nni en0 2>&1 |grep -v 'vv'
+
+for (( EXP1; EXP2; EXP3 ))
+do
+	command1
+	command2
+	command3
+done
+
+cat messages20170314 | grep -E 'f51|f52' | grep 'Assigned PPP'|awk '{print $8}'
+
+xxd -b file
+
+
+
+
+Linux MAIL
+h
+?
+del 1-3
+
+
+
+ssh root@MachineB 'bash -s' < local_script.sh
+
+
+hosts.allow 與 hosts.deny 這兩個檔案就是在限制 /etc/inetd.conf 這個檔案中，所允許的服務內容啦
+
+
+
+
+http://www.computerhope.com/unix/ucrontab.htm
+
+
+rsyslog doesn't listen on INET sockets by default. Instead, it binds to /dev/log, which is a Unix domain socket.https://en.wikipedia.org/wiki/Unix_domain_socket
+# ls -la /proc/$(pidof rsyslogd)/fd
+total 0
+dr-x------ 2 root root  0 Jul 20 11:28 .
+dr-xr-xr-x 7 root root  0 Jul 20 11:05 ..
+lrwx------ 1 root root 64 Jul 20 11:28 0 -> socket:[3559]
+l-wx------ 1 root root 64 Jul 20 11:28 1 -> /var/log/syslog
+...
+
+# netstat -x | grep 3559
+unix  19     [ ]         DGRAM                    3559     /dev/log
+
+
+
+find . -type f -perm 0770
+
+
+
+
+設定如何處理經由NAT Server出去到外部網路的封包(更改由NAT Server出去的封包Source IP位址) # iptables -t nat -A POSTROUTING -s 10.11.11.0/24 -o eth0 -j SNAT --to 192.168.22.247
+設定如何處理經由NAT Server進入到內部網路的封包(更改由NAT Server進入的封包Destination IP位址與Port) # iptables -t nat -A PREROUTING -d 10.237.0.1 -i eth0 -p tcp --dport 8080 -j DNAT --to 192.168.191.10:80
+net.ipv4.netfilter.ip_conntrack_max = 1048576
+net.ipv4.netfilter.ip_conntrack_tcp_timeout_established = 86400  #單位: 秒
+net.ipv4.tcp_keepalive_time = 86400      #單位: 秒
+
+
+
+
+
+/etc/init.d/proftp , restart add sleep 2, fix stop function
+
+
+
+iptables -t nat -D POSTROUTING 1
+
+[Ctrl]+v	區塊選擇，可以用長方形的方式選擇資料
+
+:set nonu 取消行號
+
+/word
+向游標之後尋找一個字串名稱為 word 的字串。（常用）
+?word
+向游標之前尋找一個字串名稱為 word 的字串。
+:n1,n2s/word1/word2/g
+在第 n1 與 n2 行之間尋找 word1 這個字串，並將該字串取代為 word2 ！（常用）
+:1,$s/word1/word2/g
+從第一行到最後一行尋找 word1 字串，並將該字串取代為 word2 ！（常用）
+:1,$s/word1/word2/gc
+從第一行到最後一行尋找 word1 字串，並將該字串取代為 word2 ！且在取代前顯示提示字元給使用者確認（conform）是否需要取代！（常用）
+假如我要設定全部範圍，可以這樣下： % (其實跟 1, $ 意義是一樣的)
+
+
+檢查版本
+uname -a
+cat /etc/issue.net
+
+
+ps -fp <pid>
+cat /proc/<pid>/cmdline
+
+
+
+
+You need to use the \c escape sequence. So:
+
+/\ccopyright
+
+To do the inverse (case sensitive matching), use \C instead.
+
+
+
+rpm -qf $(which free) #How to find which package certain command belongs to
+
+dpkg -S $(which free)
+
+
+

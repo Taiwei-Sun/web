@@ -1,0 +1,2 @@
+css架構是由選擇器和大括弧內的參數值所組成
+selector{property1:value1;property2:value2;}

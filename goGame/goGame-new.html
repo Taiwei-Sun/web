@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript">
+function setVariable(n)
+{
+ var h=window.innerHeight;
+ var w=window.innerWidth;
+
+ document.boardNum=n
+
+ document.ph=100/(n+2);//set piece height and width
+ document.pw=100/(n+2);
+
+ if(h>w)document.ph=document.ph*w/h;//select smaller
+ else document.pw=document.pw*h/w;
+}
+
+//alert("h="+h); 
+function around()
+{
+ var ph=document.ph;
+ var pw=document.pw;
+ var py=document.ph;
+ var px=document.pw;
+ var n=document.boardNum;
+ 
+ for(y=0;y<n;y++){
+  for(x=0;x<n;x++){
+   var pp=document.createElement("div");
+   
+   pp.className="board";
+   pp.style.position="absolute";
+   
+
+
+   pp.style.height=ph+'%';
+   pp.style.width=pw+'%';
+
+   pp.style.top=py+'%';
+   pp.style.left=px+'%';
+
+   document.body.appendChild(pp);
+   px=px+pw;
+  }
+  px=pw;
+  py=py+ph;
+ }
+
+}
+
+function goStart()
+{
+ setVariable(19);
+ around(); 
+
+}
+
+</script>
+<link rel="stylesheet" type="text/css" href="00css/goGame.css">
+</head>
+<body onload="goStart()">
+</body>
+</html>

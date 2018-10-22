@@ -1,0 +1,14 @@
+embed{
+ width:90%;
+ height:500px;
+ background-color:powderblue;
+}
+
+ul{
+ display:none;
+}
+
+.mainItem{
+ display:block;
+ list-style-type: upper-roman;
+}

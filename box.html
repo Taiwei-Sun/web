@@ -1,0 +1,308 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>BOX</title>
+<link rel="stylesheet" type="text/css" href="00css/box.css">
+<script type="text/javascript">
+
+function setParameter()
+{
+	var h=window.innerHeight;
+	var w=window.innerWidth
+	document.boxH=h/4;//紀錄長寬
+	document.boxW=w/4;
+	document.buttonH=30;
+	document.buttonW=50;
+	document.imagePath='box.bmp';
+	document.animatePeriod=40;
+	document.animateRate=4;
+	//document.queuTime=0;
+}
+function makeBox()
+{
+	var nDiv=document.createElement("div");
+	var h=100;
+	var w=100;
+	var boxH=document.boxH/window.innerHeight*h,boxW=document.boxW/window.innerWidth*w;
+	if(!document.boxNum)document.boxNum=0;
+	var n=document.boxNum;
+		
+	nDiv.style.height=boxH+'%';//長寬與位置
+	nDiv.style.width=boxW+'%';
+	nDiv.x=(w-boxW*3)/2+boxW*(n%3);
+	nDiv.y=(h-boxH*3)/2+boxH*Math.floor(n/3);
+	nDiv.style.left=nDiv.x+'%';
+	nDiv.style.top=nDiv.y+'%';
+	
+	
+	nDiv.style.overflow="hidden";
+	nDiv.style.position="absolute";
+	nDiv.id="box"+n;
+	
+	//nDiv.innerHTML='h'+boxH*3+' w'+boxW*3;
+	if(document.boxNum==4)nDiv.className="emptyBox";
+	else nDiv.className="normalBox";
+	
+	
+	nDiv.position=n;//編號
+	
+	document.body.appendChild(nDiv);
+	nDiv.setAttribute("onclick","moveBox("+n+")");//增加監聽
+	document.boxNum++;
+	if(document.boxNum<9)makeBox();
+	else {
+		makeBlackBG(boxH,boxW);
+		importImages();
+		//var text="nDiv.style.top "+nDiv.style.top+"\n"+"Number(nDiv.style.top.substr(0,nDiv.style.top.length-1)) "+Number(nDiv.style.top.substr(0, nDiv.style.top.length-1 ));alert(text);
+		
+		
+		
+		
+		
+	}
+}
+function makeBlackBG(boxH,boxW)//製作九宮格後面的黑色背景
+{
+	var blackBG=document.createElement("div");
+	var box0=document.getElementById("box"+0);
+	blackBG.style.height=boxH*3+'%';
+	blackBG.style.width=boxW*3+'%';
+	blackBG.style.left=box0.x+'%';
+	blackBG.style.top=box0.y+'%';
+	blackBG.style.backgroundColor="#000000";
+	blackBG.style.position="absolute";
+	document.body.appendChild(blackBG);
+}
+function moveBox(i)
+{
+	var tar=document.getElementsByClassName("emptyBox")[0];
+	var mvB=document.getElementById("box"+i);
+	var tmp;
+	if(checkMove(mvB.position))
+	{
+		
+		//tar.className="normalBox";
+		//mvB.className="emptyBox";
+	
+		//換圖
+		tmp=mvB.x;
+		mvB.x=tar.x;
+		tar.x=tmp;
+		tmp=mvB.y;
+		mvB.y=tar.y;
+		tar.y=tmp;
+		tmp=mvB.position;
+		mvB.position=tar.position;
+		tar.position=tmp;
+		
+		tar.style.top=tar.y+'%';
+		tar.style.left=tar.x+'%';
+		/*if(document.isRandom){//延遲換圖
+		setTimeout(myAnimate,document.queuTime,mvB,tar.y,mvB.y,'top');
+		setTimeout(myAnimate,document.queuTime,mvB,tar.x,mvB.x,'left');
+		document.queuTime+=document.boxH/document.animateRate*document.animatePeriod-300;
+		}
+		else*/{
+		myAnimate(mvB,mvB.y,'top');
+		myAnimate(mvB,mvB.x,'left');
+		}
+		
+		
+	}
+}
+function myAnimate(b,n2,s)
+{
+	var n1,currutTar;
+	switch(s)
+	{
+		case 'top':
+		n1=Number(b.style.top.substr(0, b.style.top.length-1 ));
+		currutTar=b.y;
+		break;
+		case 'left':
+		n1=Number(b.style.left.substr(0, b.style.left.length-1 ));
+		currutTar=b.x;
+		break;
+	}
+	
+	
+	if(Math.abs(n2-n1)>document.animateRate)
+	{
+	if(n2-n1>0)n1+=document.animateRate;
+	else n1-=document.animateRate;		
+	}
+	else n1=n2;
+	
+	switch(s)
+	{
+		case 'top':
+		b.style.top=n1+'%';
+		break;
+		case 'left':
+		b.style.left=n1+'%';
+		break;
+	}
+	if(n2-n1!=0)var k=setTimeout(myAnimate,document.animatePeriod,b,n2,s);
+	if(n2!=currutTar)clearTimeout(k);
+}
+
+function importImages()
+{
+	var bb;
+	var h=document.boxH,w=document.boxW;
+	for(var i=0;i<9;i++)
+	{
+		bb=document.getElementById("box"+i);
+		bb.imgX=-w*(bb.position%3);
+		bb.imgY=-h*Math.floor(bb.position/3);		
+		bb.imgN=i;
+	}
+	var myCss=document.createElement("style");
+	myCss.id="image";
+	myCss.innerHTML=".normalBox{background-image: url('"+document.imagePath+"')}";
+	document.getElementsByTagName("HEAD")[0].appendChild(myCss);
+	for(var i=0;i<9;i++)
+	{
+		bb=document.getElementById("box"+i);
+		bb.style.backgroundPosition=bb.imgX+"px"+" "+bb.imgY+"px";
+	}
+}
+
+function tryFinish()
+{
+	var box,img,emp;
+	for(var i=0;i<9;i++)
+	{
+		box=document.getElementById("box"+i);
+		if(box.position!=i)return;
+		if(box.classList.contains("emptyBox"))emp=box;
+	}
+	for(var j=0;j<9;j++)//鎖移動
+		document.getElementById("box"+j).removeAttribute("onclick");
+	if(!emp.style.backgroundImage)//顯示最後一張圖片
+	{
+	emp.style.backgroundImage="url('"+document.imagePath+"')";
+	
+	}
+}
+function randomMove(n)
+{
+	//document.queuTime=0;//佇列時間歸零
+	//document.isRandom=true;
+	var position;
+	var pre=-1;
+	for(var i=0;i<n;i++)
+	{		
+		var k=Math.floor(Math.random()*9);
+		position=document.getElementById("box"+k).position;
+		
+		if(checkMove(position)&&position!=pre){//檢查是否可移動和排除往回走的情形
+			pre=document.getElementsByClassName("emptyBox")[0].position;
+			moveBox(k);
+			}
+		else i--;
+	}
+	//document.isRandom=false;
+}
+function checkMove(n)//檢查移動的方塊是否可以移動
+{
+	var i=document.getElementsByClassName("emptyBox")[0].position;
+	if(!(n+3==i||n-3==i||n+1==i||n-1==i))return false;
+	if((i==2&&n==3)||(i==3&&n==2))return false;
+	if((i==5&&n==6)||(i==6&&n==5))return false;
+	return true;
+}
+function makeHeader()
+{
+	var head=document.createElement("DIV");
+	var h=document.boxH/window.innerHeight;
+	
+	head.id="header";
+	//alert(document.boxH);
+	head.style.height=(1-h*3)/2*100+'%';
+	head.style.position="absolute";
+	head.style.top=0+"px";
+	head.style.left=0+"px";
+	head.setAttribute("align","center");
+	head.appendChild(makeEle("reset"));
+	head.appendChild(makeEle("upload"));
+	document.body.appendChild(head);
+}
+function makeEle(s)
+{
+	var buf;
+	var h=document.buttonH+'px',w=document.buttonW+'px';
+	switch(s)
+	{
+		case "reset":
+		buf=document.createElement("BUTTON");
+		buf.innerHTML="Reset";
+		buf.style.height=h;
+		buf.style.width=w;
+		buf.setAttribute("onclick","fReset()");
+		break;
+		
+		case "upload":
+		var buf=document.createElement("INPUT");
+		
+		buf.setAttribute("type","file");
+		buf.setAttribute("id","myFile");
+		buf.setAttribute("onchange","fUpload()");		
+		break;
+		
+		
+	}
+	
+	
+	
+	return buf;
+}
+function fUpload()
+{
+	var file = document.getElementById("myFile");
+	var imgCss= document.getElementById("image");
+	var prevDiv= document.getElementById("header");
+	
+	if (file.files && file.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (evt) {
+				imgCss.innerHTML=".normalBox{background-image: url('"+evt.target.result+"')}";
+				document.imagePath=evt.target.result;
+                //prevDiv.innerHTML += '<img width="680px" src="' + evt.target.result + '" />';
+                //prevDiv.innerHTML+=" evt.target: "+evt.target;
+                
+            }
+            reader.readAsDataURL(file.files[0]);
+        }
+}
+function fReset()
+{
+	//alert("123");
+	
+	for(var j=0;j<9;j++)//解鎖移動
+	{
+		
+		document.getElementById("box"+j).setAttribute("onclick","moveBox("+j+")");
+	}
+	document.getElementsByClassName("emptyBox")[0].style.backgroundImage="";//關閉最後一張圖片
+	randomMove(10);
+}
+
+function boxStart()
+{
+	setParameter();
+	makeHeader();
+	makeBox();
+	randomMove(10);
+	setInterval(tryFinish,1000);
+	
+	
+}
+</script>
+</head>
+
+<body onload="boxStart()">
+
+</body>
+</html>

@@ -1,0 +1,30 @@
+1. install git and terminal
+2. cd the folder of the project
+3. git init
+Initialized empty Git repository in /Users/taiwei/Git/Projects/MySoftware/.git/
+4. git status
+5. git add <files or folders>, git add .
+5. git rm <files or folders>, git rm -f <files or folders>, git rm --cached <files or folders>
+6. git commit, git commit -m "Initial commit"
+[master (root-commit) c29a73e] Initial commit
+ 3 files changed, 1 insertion(+)
+ create mode 100644 Project-patch.txt
+ create mode 100644 file.txt
+ create mode 100644 web.html
+
+7. git config --global user.email "ghnbsun2011@gmail.com"
+8. git config --global user.name "Taiwei"
+9. git log, git log --oneline(short commit ID)
+10. git checkout <commit ID>(go back this commit ID), git checkout master(go to master commit)
+11. git revert <commit ID> (keeping all commit ID)
+12. git reset <--hard|--mixed|--soft>
+13. echo <ignore file name> >> .gitignore(no trace for file, may be need 'git rm -f --cached .;git add .')
+14. git branch <branch name>(create branch)
+15. git checkout -b <branch name>(create branch and switch to this branch)
+16. git branch -a(show branch)
+17. git branch -d <branch name>(delete branch)
+18. git merge <branch name>
+19. git remote add origin <URL>
+20. git remote -v
+21. merge conflict
+To see the beginning of the merge conflict in your file, search the file for the conflict marker <<<<<<<. When you open the file in your text editor, you'll see the changes from the HEAD or base branch after the line <<<<<<< HEAD. Next, you'll see =======, which divides your changes from the changes in the other branch, followed by >>>>>>> BRANCH-NAME. In this example, one person wrote "open an issue" in the base or HEAD branch and another person wrote "ask your question in IRC" in the compare branch or branch-a.
