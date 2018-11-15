@@ -1,5 +1,5 @@
 
-var rootP="/Users/taiwei/google_dirve/web/";
+var rootP="./";
 var tag=[
          "otherTag.txt",//0
          "program/C/tag.txt",
@@ -19,7 +19,8 @@ var tag=[
          "web/html/tag.txt",//15
          "databases/MySQL/tag.txt",
          "script/expect/tag.txt",
-         "script/bash/tag.txt"
+         "script/bash/tag.txt",
+         "program/Git/taged.txt"
          ];
 
 var html=[
