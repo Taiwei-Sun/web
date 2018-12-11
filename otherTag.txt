@@ -970,6 +970,10 @@ ntpq -p
 -------------------------------------------
 qnap
 
+---restart smb server
+/etc/init.d/smb.sh restart
+
+---
 echo "QNAP Serial Number: $(/sbin/get_hwsn)"
 
 find .  -mtime -1
@@ -979,6 +983,10 @@ qbox_job.conf 分享qsync
 https://www.qnap.com  qnap download center
 
 ---change proftp root directory-qnap ubuntu
+add timezone
+add 'SetEnv TZ :/etc/localtime' in proftpd.conf
+modify 'TimesGMT on' in proftpd.conf
+
 addgroup ftpHomeDir
 cat /etc/group
 usermod -a -G ftpHomeDir test
