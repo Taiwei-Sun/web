@@ -1,4 +1,0 @@
-
-VBoxManage.exe startvm “centos7-sshtunnel” --type headless
-
-

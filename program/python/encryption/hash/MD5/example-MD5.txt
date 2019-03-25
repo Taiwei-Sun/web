@@ -1,7 +1,0 @@
-#MD5 example
-import hashlib #使用MD5加密須import hashlib
-plain =  'This a inport str'
-cipher = hashlib.md5(plain) #輸入明文
-cipher.hexdigest() #輸出密文
-
-'46100f5d228f65a0d6b5ba464b9b9df9'

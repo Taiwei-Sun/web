@@ -1,6 +1,0 @@
-
-2.x版本的有个近似用法：
-先from __future__ import print_function
-再import sys
-最后print(*l,sep=' ',end='',file=sys.stdout) 就可以了
-
