@@ -10,17 +10,38 @@
 <p id="test"></p>
 <script>
 var pp=document.getElementById("test");
+
 createItem();
 
 //set event of item
-document.getElementById("web__css").onclick=function(e){if(e.target!==this)return;changeMainPage(rootP+html[3]);};
-document.getElementById("web__css__syntax").onclick=function(e){if(e.target!==this)return;changeMainPage(rootP+html[2]);};
-document.getElementById("program__python__Base").onclick=function(e){if(e.target!==this)return;changeMainPage(rootP+html[5]);};
-document.getElementById("office__microsoft__excel").onclick=function(e){if(e.target!==this)return;changeMainPage(rootP+html[6]);};
-document.getElementById(menu[20]).onclick=function(e){if(e.target!==this)return;changeMainPage(rootP+html[4]);};
-document.getElementById(menu[0]).onclick=function(e){if(e.target!==this)return;changeMainPage(rootP+html[7]);};
-document.getElementById("web__javascript").onclick=function(e){if(e.target!==this)return;changeMainPage(rootP+html[8]);};
-document.getElementById("box").onclick=function(e){if(e.target!==this)return;changeMainPage(rootP+html[9]);};//box
+/*
+document.getElementById(menu[ htmlToMenuIndex[ 2] ]).onclick= function(e){if(e.target!==this)return;changeMainPage(rootP+html[ 2]);};
+document.getElementById(menu[ htmlToMenuIndex[ 3] ]).onclick= function(e){if(e.target!==this)return;changeMainPage(rootP+html[ 3]);};
+document.getElementById(menu[ htmlToMenuIndex[ 4] ]).onclick= function(e){if(e.target!==this)return;changeMainPage(rootP+html[ 4]);};
+document.getElementById(menu[ htmlToMenuIndex[ 5] ]).onclick= function(e){if(e.target!==this)return;changeMainPage(rootP+html[ 5]);};
+document.getElementById(menu[ htmlToMenuIndex[ 6] ]).onclick= function(e){if(e.target!==this)return;changeMainPage(rootP+html[ 6]);};
+document.getElementById(menu[ htmlToMenuIndex[ 7] ]).onclick= function(e){if(e.target!==this)return;changeMainPage(rootP+html[ 7]);};
+document.getElementById(menu[ htmlToMenuIndex[ 8] ]).onclick= function(e){if(e.target!==this)return;changeMainPage(rootP+html[ 8]);};
+document.getElementById(menu[ htmlToMenuIndex[ 9] ]).onclick= function(e){if(e.target!==this)return;changeMainPage(rootP+html[ 9]);};
+document.getElementById(menu[ htmlToMenuIndex[10] ]).onclick= function(e){if(e.target!==this)return;changeMainPage(rootP+html[10]);};
+*/
+
+
+var i;
+for(i=0;i<html.length;i++){
+	if(htmlToMenuIndex[i]>=0){
+		var html_onclick=document.getElementById(menu[ htmlToMenuIndex[i] ]);
+		html_onclick.html_index=i;
+		
+		html_onclick.onclick=function(e){
+			if(e.target!==this)return;
+			changeMainPage(rootP+html[this.html_index]);
+			};
+	}
+	//console.log("i="+i);
+}
+
+
 
 //add check all page;
 document.write('<a href="allTag.html" target="main">All Tag<br /></a>');

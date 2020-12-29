@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<h1>Git</h1>
+一個寫程式版本控制工具，紀錄程式中每個檔案的變化，可以比較不同版本的檔案內容，可以在各版本之間做切換，可在指定的版本上debug或開發新的功能，多人開發新功能時，可以合併不同版本，上傳到github作保留。<br />
+
+<h1>功能</h1>
+
+<h2>建立</h2>
+<br/>
+建立新的repository步驟:<br/>
+<ol>
+	<li>git init</li>
+	<li>git add .</li>
+	<li>git commit</li>
+</ol>
+<br/>
+
+<br/>
+git init #建立repository<br/>
+<img src="imgs/git_init.png" ></img><br />
+<br/>
+
+<br/>
+git add . #新檔案加入追蹤名單 或是 已修改檔案加入追蹤名單<br/>
+<img src="imgs/git_add_.png" ></img><br />
+<img src="imgs/git_add_2.png" ></img><br />
+<br/>
+
+<br/>
+git commit #產生新的commit<br/>
+<img src="imgs/git_commit.png" ></img><br />
+<br/>
+
+<h2>比較</h2>
+<br/>
+檔案比較:<br/>
+<ol>
+	<li>全部檔案比較</li>
+	<ol ="a">
+		<li>commited與commited</li>
+		<li>commited與modified</li>
+		<li>commited與staged</li>
+		<li>commited與untracked</li>
+		<li>modified與staged</li>
+	</ol>
+	<li>單個檔案比較: 後面接上檔案的路徑與名稱</li>
+</ol>
+<br/>
+
+<br/>
+commited與commited<br/>
+git diff commit01 commit02 #比較commit01與commit02的檔案差異<br/>
+<img src="imgs/git_diff_commit01_commit02.png" ></img><br />
+<br/>
+
+<br/>
+commited與modified<br/>
+git diff HEAD#比較modified與最後一個commit的檔案差異<br/>
+<img src="imgs/git_diff_HEAD.png" ></img><br />
+git diff commit02 #比較modified與commit02的檔案差異<br/>
+<img src="imgs/git_diff_commit02.png" ></img><br />
+<br/>
+
+<br/>
+commited與staged<br/>
+git diff --staged #比較staged與最後一個commit的檔案差異<br/>
+<img src="imgs/git_diff_staged.png" ></img><br />
+git diff commit02 --staged #比較staged與commit02的檔案差異<br/>
+<img src="imgs/git_diff_commit02_staged.png" ></img><br />
+<br/>
+
+<br/>
+commited與untracked<br/>
+git status --untracked-files #只顯示檔案數量<br/>
+<img src="imgs/git_status_untracked_files.png" ></img><br />
+<br/>
+
+<br/>
+modified與staged<br/>
+git diff #比較modified與staged的檔案差異<br/>
+<img src="imgs/git_diff.png" ></img><br />
+<br/>
+
+
+<h2>切換</h2>
+
+<h2>刪除</h2>
+<br/>
+git reset --hard commit02 #刪除commit02之後的commit，並且把head指向commit02<br/>
+<img src="imgs/git_reset_hard_commit02.png" ></img><br />
+<br/>
+
+</body>
+</html>

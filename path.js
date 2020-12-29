@@ -1,5 +1,9 @@
 
-var rootP="./";
+var rootP=window.location.pathname;
+rootP=rootP.slice(1, rootP.lastIndexOf("/"))+"/";
+//console.log("The URL of this page is: " + rootP );
+window.localStorage.setItem('rootPath', rootP);
+
 var tag=[
          "otherTag.txt",//0
          "program/C/tag.txt",
@@ -19,8 +23,7 @@ var tag=[
          "web/html/tag.txt",//15
          "databases/MySQL/tag.txt",
          "script/expect/tag.txt",
-         "script/bash/tag.txt",
-         "program/Git/taged.txt"
+         "script/bash/tag.txt"
          ];
 
 var html=[
@@ -33,8 +36,15 @@ var html=[
           "office/microsoft/excel/excel.html",
           "math/math.html",
           "web/javascript/javascript.html",
-          "box.html"
+          "box.html",
+		  "diffConfigJuniper.html",//10
+          "program/Git/git.html"
           ];
+
+var htmlToMenuIndex=[-1,-1,31,29,20,
+					18,4,0,33,34,
+					37,38
+					];
 
 var menu=[
           "math",//0
@@ -73,7 +83,9 @@ var menu=[
           "web__javascript",
           "box",
           "databases",//35
-          "databases__MySQL"
+          "databases__MySQL",
+		  "diffConfigJuniper",
+          "program__Git"
          ];
 
 

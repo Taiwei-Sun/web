@@ -29,11 +29,11 @@ function itemOnclick(event){
 }
 
 
-function changeMainPage(urlStr){//更換主頁
+function changeMainPage(urlStr,var_string){//更換主頁
  var a = document.createElement('a');
  a.href=urlStr;
  a.target = 'main';
-  document.body.appendChild(a);
+ document.body.appendChild(a);
  a.click();
  document.body.removeChild(a);
 }

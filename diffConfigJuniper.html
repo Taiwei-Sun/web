@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Compare Config for Juniper</title>
+<script language="javascript" type="text/javascript">
+//20190813 for export CSV file name
+//add getDateStr 
+//add findHostname
+//add renameCSV
+
+//20190816 add spareCommands
+
+//20190822
+//add commandInsertGetRuleName
+//add commandInsertSortRuleSwitch
+//add commandInsertSort
+
+//20190823 Unable to determine if more command for insert!!!
+//add commandInsertGetRuleIndex
+//add commandInsertCheckAndReport
+//add commandInsertModifyConfigsByCommands
+//add commandInsert
+
+//20190824
+//add commandInsertFindOrigin
+//add commandInsertCreateOrder
+//add commandInsertFilter
+//add commandInsertOriginCommandICheck
+
+//20190826
+//add commandInsertOtherConfigFilter
+
+//20190904
+
+
+//download program
+//https://stackoverflow.com/questions/3665115/how-to-create-a-file-in-memory-for-user-to-download-but-not-through-server
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+var csvFirst=true;
+var csvText="";
+function addStrToCsv(index,array){
+	if(index<array.length){
+		if(csvFirst){
+			csvFirst=false;
+			csvText=csvText+'"'+array[index]+'"';
+		}else{
+			csvText=csvText+',"'+array[index]+'"';
+		}
+	}else csvText=csvText+',';
+}
+function buttonDownload(fileName,fileType){
+	var textPrecheck=document.getElementById("precheck");
+	var textPostcheck=document.getElementById("postcheck");
+	var textDiff1=document.getElementById("divAdd");
+	var textDiff2=document.getElementById("divDel");
+	var textCommand=document.getElementById("commandSet");
+	var textResult=document.getElementById("divCommand");
+	
+	if(fileType=="txt"){
+		
+		var text="Precheck\r\n"+textPrecheck.value.replace(/\n/g, '\r\n')
+		+"\r\n##########################\r\nPostcheck\r\n" 
+		+textPostcheck.value.replace(/\n/g, '\r\n')
+		+"\r\n##########################\r\n"
+		+textDiff1.innerHTML.replace(/<br>/g, '\r\n').replace(/<.*?>/g, '')
+		+"\r\n##########################\r\n"
+		+textDiff2.innerHTML.replace(/<br>/g, '\r\n').replace(/<.*?>/g, '')
+		+"\r\n##########################\r\nCommand\r\n"
+		+textCommand.value.replace(/\n/g, '\r\n')
+		+"\r\n##########################\r\n"
+		+textResult.innerHTML.replace(/<br>/g, '\r\n').replace(/<.*?>/g, '');
+		
+		download(fileName,text);
+	}else if(fileType=="csv"){
+		csvText="Comparing Results,Command,Lost Config,More Config,Postcheck,Precheck\n";
+		var textPrechecks=textPrecheck.value.split(/\r?\n/);
+		var textPostchecks=textPostcheck.value.split(/\r?\n/);
+		var textDiff1s=textDiff1.innerHTML.replace(/<br>/g, '\r\n').replace(/<.*?>/g, '').split(/\r?\n/).slice(1);
+		var textDiff2s=textDiff2.innerHTML.replace(/<br>/g, '\r\n').replace(/<.*?>/g, '').split(/\r?\n/).slice(1);
+		var textCommands=textCommand.value.split(/\r?\n/);
+		var textResults=textResult.innerHTML.replace(/<br>/g, '\r\n').replace(/<.*?>/g, '').split(/\r?\n/).slice(1);
+		
+		
+		//csvText=csvText+textPrechecks.length+" "+textPostchecks.length+" "+textDiff1s.length+" "+textDiff2s.length+" "+textCommands.length+" "+textResults.length+'\n';
+		var i;
+		for(i=0;i<textPrechecks.length||i<textPostchecks.length||i<textDiff1s.length||i<textDiff2s.length||i<textCommands.length||i<textResults.length;i++){
+			csvFirst=true;
+			addStrToCsv(i,textResults);
+			addStrToCsv(i,textCommands);
+			addStrToCsv(i,textDiff2s);
+			addStrToCsv(i,textDiff1s);
+			addStrToCsv(i,textPostchecks);
+			addStrToCsv(i,textPrechecks);
+			
+			
+			
+			csvText=csvText+'\n';
+		}
+		
+		
+		
+		download(fileName,csvText);
+		
+	}
+}
+//download program
+
+
+
+var textRights=[];
+var textLefts=[];
+var textRightIndex=[];
+var textLeftIndex=[];
+var textEquals=[];
+var InsertCommandMessage="Other Insert Command";
+var InsertCommandKeyWord="term"
+
+function testF(str){
+	var textDemoVar=document.getElementById("textDemo");
+	textDemoVar.innerHTML+=str+"\n";
+}
+
+function commandInsertGetRuleName(command,comOrigin){//get rule name used for rule order. Note: comOrigin String last character must be space(" ")
+	var tmpCom=command.split(comOrigin);
+	tmpCom=tmpCom[1].split(" ");
+	return tmpCom[0];
+}
+
+function commandInsertGetRuleIndex(configs,rule){//find first and last index includes rule on configs
+	var ruleI=[-1,-1];
+	var i;
+	if(rule[rule.length-1]!=" ")rule+=" ";
+	for(i=0;i<configs.length;i++){
+		var tmpCons=configs[i].split(" ");
+		if(configs[i].includes(rule)){
+			ruleI[0]=i;
+			for(;i<configs.length;i++){
+				if(!configs[i].includes(rule))break;
+			}
+			ruleI[1]=i-1;
+		}
+	}
+	
+	return ruleI;
+}
+
+function commandInsertFindOrigin(oneCommandI){
+	var origin;
+	
+	/*//commandInsertFindOrigin v1
+	var commandsIFilter=oneCommandI.substring(7,);//delete "insert "
+	var spareCommandBySpace=commandsIFilter.split(" ");
+	var beforeAfterIndex=spareCommandBySpace.indexOf("after");
+	if(beforeAfterIndex==-1)beforeAfterIndex=spareCommandBySpace.indexOf("before");
+	var tmpOrigin=commandsIFilter.split(spareCommandBySpace[beforeAfterIndex-1]);
+	origin="set "+tmpOrigin[0];//last word is space
+	*/
+	
+	if(oneCommandI.includes("term")){
+		var tmpOneCommandI=oneCommandI.split("term");
+		var tmpPreConfig=tmpOneCommandI[0];
+		
+		if(tmpPreConfig.substring(0,6)=="insert")origin="set"+tmpPreConfig.substring(6,)+"term ";
+		if(tmpPreConfig.substring(0,6)=="delete")origin="set"+tmpPreConfig.substring(6,)+"term ";
+		if(tmpPreConfig.substring(0,3)=="set")origin=tmpPreConfig+"term ";
+	} else return -1;
+	
+	
+	return origin;
+	
+}
+
+function commandInsertModifyConfigsByCommands(configs,commandS,CommandD,origin){//Note: new command add to after the same rule preconfig
+	var tmpConfigs=configs.slice();
+	var i,j;
+	var originBool=(origin==null);
+	
+	
+	for(i=0;i<commandS.length;i++){
+		if(originBool)origin=commandInsertFindOrigin(commandS[i]);
+		if(commandS[i].includes(origin)){
+			var tmpRule=origin+commandInsertGetRuleName(commandS[i],origin);
+			var tmpRuleIndex=commandInsertGetRuleIndex(tmpConfigs,tmpRule);
+			if(tmpRuleIndex[0]==-1||tmpRuleIndex[1]==-1)tmpRuleIndex=commandInsertGetRuleIndex(tmpConfigs,origin);
+			if(!(tmpRuleIndex[0]==-1||tmpRuleIndex[1]==-1))tmpConfigs.splice(tmpRuleIndex[1]+1, 0,commandS[i]);
+			//testF(" tmpRuleIndex[1]+1="+(tmpRuleIndex[1]+1)+" commandS[i]="+commandS[i]+"\n tmpConfigs="+tmpConfigs+"\n");
+		}
+	}
+	
+	for(i=0;i<CommandD.length;i++){//!!!
+		
+		if(originBool)origin=commandInsertFindOrigin(commandD[i]);
+		
+		if(CommandD[i].includes(origin)){
+			for(j=0;j<tmpConfigs.length;j++){
+				if(tmpConfigs[j].includes(CommandD[i]))tmpConfigs.splice(j,1);
+			}
+		}
+		
+	}
+	
+	return tmpConfigs;
+}
+
+
+
+function commandInsertSortRuleSwitch(configs,rule2,rule1,after){//rule must include origrin String
+	
+	var i;
+	var tmpCom="";
+	var conBaks=configs.slice();
+	var ruleIndex1=[];
+	var ruleIndex2=[];
+	
+	ruleIndex1=commandInsertGetRuleIndex(configs,rule1);//find first and last Index
+	ruleIndex2=commandInsertGetRuleIndex(configs,rule2);//find ruleIndex2[0],ruleIndex2[1]
+	testF("!!!ruleIndex1="+ruleIndex1+"   ruleIndex2="+ruleIndex2);
+	var ruleLen=ruleIndex2[1]-ruleIndex2[0]+1;
+	configs.splice(ruleIndex2[0], ruleLen, );
+	
+	if(after){
+		
+		for(i=0;i<ruleLen;i++){
+			if(ruleIndex1[0]<ruleIndex2[0]){
+				configs.splice(ruleIndex1[1]+1+i, 0,conBaks[ruleIndex2[0]+i]);
+				
+			}
+			else configs.splice(ruleIndex1[1]-ruleLen+1+i, 0,conBaks[ruleIndex2[0]+i]);
+		}
+			
+	}else {
+		for(i=0;i<ruleLen;i++){
+			if(ruleIndex1[0]<ruleIndex2[0]){
+				if(ruleIndex1[0]-1+i>=0){
+					configs.splice(ruleIndex1[0]+i, 0,conBaks[ruleIndex2[0]+i]);
+				}else {
+					configs.splice(0, 0,conBaks[ruleIndex2[0]]);
+				}
+				
+			}
+			else configs.splice(ruleIndex1[0]-ruleLen, 0,conBaks[ruleIndex2[1]-i]);
+		}
+	}
+	
+	return configs;
+}
+
+function commandInsertSort(configs,order,comOrigin){
+	
+	testF("configs="+configs+"\n");
+	testF("order="+order+"\n");
+	testF("comOrigin="+comOrigin+"\n");
+	var i;
+	var configsFilter=[];
+	for(i=0;i<order.length;i+=3){
+		configs=commandInsertSortRuleSwitch(configs,comOrigin+order[i],comOrigin+order[i+1],order[i+2]);
+		
+	}
+	return configs;
+}
+
+
+function commandInsertCheckAndReport(pre,post,com,showDiv){//check order and show result
+	var i;
+	var tmpResult="<br /><br />Insert Command:<br />";
+	var otherCom=(com[0]==InsertCommandMessage);
+	
+	for(i=0;i<com.length;i++){
+		tmpResult+=com[i]+"<br />"
+	}
+	
+	tmpResult+="Insert Result:<br />";
+	if(pre.length!=post.length){
+		tmpResult+="<font color='red'>the number of set configs are different</font><br />";
+		tmpResult+="<font color='red'>postcheck="+post+"</font><br /><br />";
+		tmpResult+="<font color='red'>check="+pre+"</font><br /><br />";
+	}else{
+		for(i=0;i<pre.length;i++)
+			if(pre[i]==post[i]){if(!otherCom)tmpResult+="<font color='blue'>OK: "+(i+1)+". "+post[i]+"</font>  =  <font color='green'>"+pre[i]+"</font><br />";}
+			else tmpResult+="<font color='red'>different order: "+(i+1)+". "+post[i]+"</font>  -must be->  <font color='green'>"+pre[i]+"</font><br />";
+	}
+	
+	
+	showDiv.innerHTML=showDiv.innerHTML+tmpResult;
+	
+}
+
+
+
+function commandInsertFilter(commandsI,origin){
+	var commandsIFilter=[];
+	var i,j;
+	for(i=0;i<commandsI.length;i++){
+		if(commandsI[i].includes(origin.substring(4,))){//delete "set "
+			
+			commandsIFilter.push(commandsI[i]);
+		}
+			
+
+	}
+	
+	return commandsIFilter;
+}
+
+
+function commandInsertCreateOrder(commandsIFilterHasOrigin,origin){
+	var orderI=[];
+	var i;
+	var commandsIFilter=[]
+	for(i=0;i<commandsIFilterHasOrigin.length;i++){
+		commandsIFilter[i]=commandsIFilterHasOrigin[i].substring(origin.length-4+7,);//delete origin "insert ..."
+	}
+	
+	
+	
+	for(i=0;i<commandsIFilter.length;i++){//spare command by space, rule1=[0], rule2=[3], afterBeforeString=[1]
+		var tmpCommandsIFilter=commandsIFilter[i].split(" ");
+		
+		
+		var comRule1=tmpCommandsIFilter[0];
+		var comRule2=tmpCommandsIFilter[3];
+		var tmpAfterBool=(tmpCommandsIFilter[1]=="after");
+		orderI.push(comRule1);
+		orderI.push(comRule2);
+		orderI.push(tmpAfterBool);
+	
+	}
+	
+	return orderI;
+}
+
+function commandInsertOriginCommandICheck(commandI,origin){
+	//testF("commandI="+commandI+" origin="+origin+" origin.length="+origin.length);
+	var i;
+	for(i=0;i<origin.length;i++){
+		var tmpOrigin=origin[i].substring(4,);//remove "set "
+		if(commandI.includes(tmpOrigin))return true;
+	}
+	return false;
+}
+
+function commandInsertOtherConfigFilter(pre,post,originType){
+	var preFilter=[];
+	var postFilter=[];
+	var i,j;
+	
+	for(i=0;i<pre.length;i++){
+		if(pre[i].includes(InsertCommandKeyWord)){
+			if(!commandInsertOriginCommandICheck(pre[i],originType))preFilter.push(pre[i]);
+		}
+	}
+	for(i=0;i<post.length;i++){
+		if(post[i].includes(InsertCommandKeyWord)){
+			if(!commandInsertOriginCommandICheck(post[i],originType))postFilter.push(post[i]);
+		}
+	}
+	//testF("preFilter="+preFilter+"\npostFilter="+postFilter);
+	return [preFilter,postFilter];
+}
+
+function commandInsert(preconfigs,postconfigs,commandsI,commandsS,commandD,showDiv){
+	
+	
+	var i,j;
+	var originType=[];
+	
+	
+	
+	for(j=0;j<commandsI.length;j++){
+		if(commandInsertOriginCommandICheck(commandsI[j],originType))continue;
+		
+		var preconfigsFilter=[];
+		var postconfigsFilter=[];
+		
+		var comOrigin=commandInsertFindOrigin(commandsI[j]);
+		originType.push(comOrigin);
+		var commandFilter=commandInsertFilter(commandsI,comOrigin);
+		
+		var commandsIOrder=commandInsertCreateOrder(commandFilter,comOrigin);
+		
+		
+		
+		
+		for(i=0;i<preconfigs.length;i++){
+			if(preconfigs[i].includes(comOrigin)){
+				preconfigsFilter.push(preconfigs[i]);
+			}
+		}
+		
+		testF("a");
+		//new command which has same comOrigin add to preconfig.
+		preconfigsFilter=commandInsertModifyConfigsByCommands(preconfigsFilter,commandsS,commandD,comOrigin);
+		testF("b");
+		preconfigsFilter=commandInsertSort(preconfigsFilter,commandsIOrder,comOrigin);
+		testF("c: preconfigsFilter="+preconfigsFilter+"\n");
+		for(i=0;i<postconfigs.length;i++){
+			if(postconfigs[i].includes(comOrigin)){
+				postconfigsFilter.push(postconfigs[i]);
+				
+			}
+		}
+		testF("d");
+		
+		
+		commandInsertCheckAndReport(preconfigsFilter,postconfigsFilter,commandFilter,showDiv);
+		testF("e");
+	}
+	
+	//testF("1");
+	//var otherConfigs=commandInsertOtherConfigFilter(preconfigs,postconfigs,originType);
+	//preconfigs=otherConfigs[0];
+	//postconfigs=otherConfigs[1];
+	//
+	//
+	//testF("2");
+	//preconfigs=commandInsertModifyConfigsByCommands(preconfigs,commandsS,commandD,null);
+	//postconfigs=commandInsertModifyConfigsByCommands(postconfigs,commandsS,commandD,null);
+	//
+	//testF("3");
+	//commandInsertCheckAndReport(preconfigs,postconfigs,[InsertCommandMessage],showDiv);
+	
+	
+}
+
+function spareCommands(commandType,commands){
+	var i,j;
+    var commandSpare=[]
+	var typeNum=[];
+	for(i=0;i<commandType.length;i++){
+		typeNum[i]=0;
+	}
+    
+	for(i = 0; i < commandType.length; i++){
+        if(typeNum[i]==0)commandSpare[i]=[];
+		for(j=0;j<commands.length;j++){
+			if(commands[j].substring(0,commandType[i].length)==commandType[i]){
+				commandSpare[i][typeNum[i]]=commands[j];
+				commands[j]="ok";
+				typeNum[i]++;
+			}
+		}
+	}
+    
+    //for other command
+    var othI=commandType.length;
+    var othNum=0;
+    commandSpare[othI]=[];
+    for(j = 0; j < commands.length; j++){
+    	if(commands[j]!="ok"){
+			commandSpare[othI][othNum]=commands[j];
+			commands[j]="ok";
+			othNum++;
+		}
+    }
+    
+    
+    return commandSpare;
+	
+}
+
+
+function findHostname(str){
+	var hostnameRegex = / system host-name [^\n]*\r?\n/g;
+	var found = str.match(hostnameRegex);
+
+	
+	if(found!=null){
+		found[0]=found[0].replace(" system host-name ","");//remove pre
+		found[0]=found[0].replace(/\.[Rr][Ee][0-9]\r?\n/g,"");//remove post
+		return found[0];
+	}
+	else {
+		return "NullHostname";
+	}
+
+}
+
+function getDateStr(){
+	var d = new Date();
+	var YYYY=d.getFullYear().toString();
+	var MM;
+	var DD;
+	
+	if(d.getMonth()+1<10) MM="0"+(d.getMonth()+1).toString();
+	else MM=(d.getMonth()+1).toString();
+	
+	if(d.getDate()<10) DD="0"+d.getDate().toString();
+	else DD=d.getDate().toString();
+
+	return YYYY+MM+DD
+}
+
+function renameCSV(str){
+	var dateStr=getDateStr();
+	var hostnameStr=findHostname(str);
+	var nameCSV="compare_config_check_day_device.csv"
+	
+	nameCSV=nameCSV.replace("day",dateStr);
+	nameCSV=nameCSV.replace("device",hostnameStr);
+	
+	document.getElementById("inputNameCSV").value=nameCSV;
+}
+
+function printTextLine(SStr,div,MStr,EStr){
+ div.innerHTML=div.innerHTML+SStr+MStr+EStr;
+}
+
+function printTextArray(SStr,div,arr,EStr){
+ var i;
+ for(i=0;i<arr.length;i++)
+  printTextLine(SStr,div,arr[i],EStr+"<br />");
+}
+
+function textDiffLine(line,array){
+	
+	var i;
+	for (i = 0; i < array.length; i++) {
+		if(line==array[i]){
+			return i;
+		}
+	}
+	return -1;
+}
+
+
+
+function textDiffArray(arr1,arr2){
+ textRights=[];
+ textLefts=[];
+ textRightIndex=[];
+ textLeftIndex=[];
+ textEquals=[];
+ 
+ 
+ var i;
+ for (i = 0; i < arr2.length; i++) {
+  if(textDiffLine(arr2[i],arr1)!=-1){
+	textEquals.push(arr2[i]);
+  }else{
+	textRights.push(arr2[i]);
+	textRightIndex.push(i);
+  }
+ }
+ 
+ 
+ 
+ var i;
+ for (i = 0; i < arr1.length; i++) {
+  if(textDiffLine(arr1[i],arr2)!=-1){
+	//textEquals.push(arr1[i]);
+  }else{
+	textLefts.push(arr1[i]);
+	textLeftIndex.push(i);
+  }
+ }
+ 
+}
+
+
+
+
+function buttonDiff(){
+ var divAddVar=document.getElementById("divAdd");
+ var divDelVar=document.getElementById("divDel");
+ divAddVar.innerHTML="<font color='blue'>More Config</font><br />";
+ divDelVar.innerHTML="<font color='blue'>Lost Config</font><br />";
+ var confPres = document.getElementById("precheck").value.split(/\r?\n/);
+ var confPosts = document.getElementById("postcheck").value.split(/\r?\n/);
+ 
+ //rename CSV
+ renameCSV(document.getElementById("precheck").value);
+ 
+ //confPres=confPres.repeat(/^\s*$(?:\r\n?|\n)/gm,"");
+ //confPosts=confPosts.repeat(/^\s*$(?:\r\n?|\n)/gm,"");
+ 
+ textDiffArray(confPres,confPosts);
+ printTextArray("postcheck+ ",divAddVar,textRights,"");
+ printTextArray("postcheck- ",divDelVar,textLefts,"");
+ 
+ return [confPres,confPosts];
+}
+
+function changeAllIpv6(str){
+	var ipv6Regex = / [a-fA-F0-9]{0,4}:[a-fA-F0-9:]*[ \n\/]/g;
+	var found = str.match(ipv6Regex);
+
+	var i;
+	if(found!=null)
+		for(i=0;i<found.length;i++){
+			str=str.replace(found[i],found[i].toLowerCase());
+		}
+	
+	return str;
+
+
+}
+
+function buttonCompare(){
+	
+	var configAll=buttonDiff();
+	var divCommandVar=document.getElementById("divCommand");
+	divCommandVar.innerHTML="<font color='blue'>Comparing Results</font><br />";
+	
+	//change all ipv6 to special formation
+	var commandTmp=changeAllIpv6(document.getElementById("commandSet").value);
+	
+	var commands = commandTmp.split(/\r?\n/);
+	var commandAll=[];
+	var typeIndex=0;
+	var configAdds=textRights.slice();
+	var configDels=textLefts.slice();
+	
+	
+	//spare command for 'set', 'delete' and other
+	var commandType=["set","delete","insert"];
+	commandAll=spareCommands(commandType,commands);
+	
+	
+	
+	
+	//diff set command
+	typeIndex=commandType.indexOf("set");
+	if(commandAll[typeIndex].length>0){
+		textDiffArray(configAdds,commandAll[typeIndex])
+		//printTextArray("OK: ",divCommandVar,textEquals,"");
+		var i;
+		for(i=0;i<textEquals.length;i++){
+			printTextLine("OK: <font color='blue'>",divCommandVar,textEquals[i],"</font> =");
+			printTextLine(" <font color='green'>",divCommandVar,textEquals[i],"</font><br />");
+		}
+		if(!(textRights==""&&textLefts=="")){
+		
+			if(textRights!=""){
+				var i;
+				for(i=0;i<textRights.length;i++){
+					printTextLine("<font color='red'>Lost Command: ",divCommandVar,textRights[i],"</font><br />");
+				}
+			}
+			
+			if(textLefts!=""){
+				var i;
+				for(i=0;i<textLefts.length;i++){
+					printTextLine("<font color='red'>More Command: ",divCommandVar,textLefts[i],"</font><br />");
+				}
+			}
+			
+		}
+	}
+	
+	
+	
+	
+	//diff delete command
+	typeIndex=commandType.indexOf("delete");
+	if(commandAll[typeIndex].length>0){
+		var tmpCommDel=[];
+		var i;
+		for(i=0;i<commandAll[typeIndex].length;i++){//remove 'delete ' to tmpCommDel
+			tmpCommDel.push(commandAll[typeIndex][i].slice(7,));
+		}
+		
+		var i;
+		var checkMoreCommand=configDels.slice();
+		for(i=0;i<commandAll[typeIndex].length;i++){
+			var tmpConfDel=[];
+			var j;
+			for(j=0;j<configDels.length;j++){//remove 'set ' to tmpConfDel
+				tmpConfDel.push(configDels[j].slice(4,4+tmpCommDel[i].length));
+			}
+			
+			var sameIndex=[];//get all index of tmpConfDel for same config
+			while(sameIndex[sameIndex.length-1]!=-1){
+				var tmpI=textDiffLine(tmpCommDel[i],tmpConfDel);
+				if(tmpI!=-1){
+					sameIndex.push(tmpI);
+					tmpConfDel[tmpI]=null;
+					checkMoreCommand[tmpI]=null;
+				}else break;
+			}
+			
+			
+			if(sameIndex.length>0){
+				printTextLine("OK: <font color='blue'>",divCommandVar,commandAll[typeIndex][i],"</font> = ");
+				var k;
+				for(k=0;k<sameIndex.length;k++){
+					printTextLine("<font color='green'>("+(k+1)+"). ",divCommandVar,configDels[sameIndex[k]],"</font>  ");
+				}
+				printTextLine("",divCommandVar,"<br />","");
+			}else{
+				printTextLine("<font color='red'>Lost Command: ",divCommandVar,commandAll[typeIndex][i],"</font><br />");
+				
+			}
+			
+			
+		}
+		
+		var i;
+		for(i=0;i<checkMoreCommand.length;i++){
+			
+			if(checkMoreCommand[i]!=null){
+				var tmpStr="delete"+checkMoreCommand[i].slice(3,);
+				printTextLine("<font color='red'>More Command: ",divCommandVar,tmpStr,"</font><br />");
+			}
+		}
+	}
+	
+	
+	
+	//insert command
+	var comInsertIndex=commandType.indexOf("insert");
+	var comSetIndex=commandType.indexOf("set");
+	var comDeleteIndex=commandType.indexOf("delete");
+	if(commandAll[comInsertIndex].length>0)commandInsert(configAll[0],configAll[1],commandAll[comInsertIndex],commandAll[comSetIndex],commandAll[comDeleteIndex],divCommandVar);
+	
+	
+	
+	//other command
+	typeIndex=commandType.length;
+	if(commandAll[typeIndex].length>0){
+		var i;
+		for(i=0;i<commandAll[typeIndex].length;i++){
+			
+			if(commandAll[typeIndex][i]!=null&&commandAll[typeIndex][i]!=""){
+				printTextLine("<font color='red'>Lost Command: ",divCommandVar,commandAll[typeIndex][i],"</font><br />");
+			}
+		}
+	}
+	
+}
+
+
+</script>
+</head>
+<body>
+<b>Precheck</b><br />
+<textarea rows="20" cols="170" id="precheck">
+ctrl+a, select all
+ctrl+v, paste precheck here
+</textarea><br />
+<b>Postcheck</b><br />
+<textarea rows="20" cols="170" id="postcheck">
+ctrl+a, select all
+ctrl+v, paste postcheck here
+</textarea><br />
+<button type="button" onclick="buttonDiff()" hidden>Generate diff text!</button><br />
+<div id="divAdd" style="background-color: lightblue;"><font color='blue'>More Config</font><br /></div><br />
+<div id="divDel" style="background-color: lightgreen;"><font color='blue'>Lost Config</font><br /></div><br />
+<b>Command</b><br />
+<textarea rows="20" cols="170" id="commandSet">
+ctrl+a, select all
+ctrl+v, paste command(set type) here
+</textarea><br />
+<button type="button" onclick="buttonCompare()">Compare config!</button><br />
+<div id="divCommand" style="background-color: yellow;"><font color='blue'>Comparing Results</font><br /></div><br />
+<textarea id="textDemo" >
+test
+</textarea><br />
+<button type="button" onclick="buttonDownload()" hidden>generate TXT</button><br />
+
+<form onsubmit="buttonDownload(this['name'].value,'csv')" >
+	<input type="text" name="name" id="inputNameCSV" value="compare_config_check_day_device.csv">
+	<select name="YourLocation" hidden>
+		<option value="Taipei">Precheck</option>
+		<option value="Taoyuan">Postcheck</option>
+		<option value="Hsinchu">More Config</option>
+		<option value="Miaoli">Lost Config</option>
+	</select>
+	<input type="submit" value="Generate CSV">
+</form>
+</body>
+</html>
